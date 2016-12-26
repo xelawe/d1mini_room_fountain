@@ -16,11 +16,15 @@
 #include "ota_tool.h"
 #include "time_tool.h"
 
-#define PIN_BUTTON 15
+#define PIN_BUTTON 13
 #define PIN_RELAY 4
-#define PIN_LED BUILTIN_LED
+#define PIN_LED 12
+#define PIN_INPUT 14
+
 #define relStateOFF HIGH
 #define relStateON LOW
+#define butStateOFF HIGH
+#define butStateON LOW
 #define inpStateLow LOW // Low Water state
 
 const int CMD_WAIT = 0;
@@ -117,16 +121,20 @@ void setup() {
 
   DebugPrintln("\n" + String(__DATE__) + ", " + String(__TIME__) + " " + String(__FILE__));
 
-  wifi_init("D1miniRF");
-  delay(500);
-
-  init_ota("D1miniRF");
-
   pinMode(PIN_LED, OUTPUT);  // initialize onboard LED as output
   digitalWrite(PIN_LED, LOW);   // turn off LED with voltage LOW
   pinMode(PIN_RELAY, OUTPUT);  // initialize onboard LED as output
   digitalWrite(PIN_RELAY, relStateOFF);   // turn off LED with voltage LOW
   pinMode(PIN_BUTTON, INPUT_PULLUP);  // initialize onboard LED as output
+  pinMode(PIN_INPUT, INPUT_PULLUP);
+  InputState = digitalRead(PIN_INPUT);
+  attachInterrupt(PIN_INPUT, toggleInput, CHANGE);
+  
+  wifi_init("D1miniRF");
+  delay(500);
+
+  init_ota("D1miniRF");
+
   attachInterrupt(PIN_BUTTON, toggleState, CHANGE);
 
   init_time();
@@ -150,27 +158,41 @@ void loop() {
   //  digitalWrite(PIN_RELAY, RelayOff);   // turn off Relay with voltage HIGH
   //  delay(5000);                      // wait one second
 
+  switch (cmd_inp) {
+    case CMD_WAIT:
+      break;
+    case CMD_INPUT_CHANGE:
+      int currentStateInp = digitalRead(PIN_INPUT);
+      if (currentStateInp != InputState) {
+        if (currentStateInp == inpStateLow) {
+          turnOff();
+        }
+        InputState = currentStateInp;
+        break;
+      }
+  }
+
   switch (cmd) {
     case CMD_WAIT:
       break;
     case CMD_BUTTON_CHANGE:
       int currentState = digitalRead(PIN_BUTTON);
       if (currentState != buttonState) {
-        if (buttonState == LOW && currentState == HIGH) {
+        if (buttonState == butStateON && currentState == butStateOFF) {
           long duration = millis() - startPress;
           if (duration < 50) {
-            Serial.println("too short press - no action");
-          } else if (duration < 2000) {
-            Serial.println("short press - toggle relay");
+            DebugPrintln("too short press - no action");
+          } else if (duration < 1000) {
+            DebugPrintln("short press - toggle relay");
             toggle();
-          } else if (duration < 10000) {
-            Serial.println("medium press - reset");
+          } else if (duration < 5000) {
+            DebugPrintln("medium press - reset");
             restart();
           } else if (duration < 60000) {
-            Serial.println("long press - reset settings");
+            DebugPrintln("long press - reset settings");
             reset();
           }
-        } else if (buttonState == HIGH && currentState == LOW) {
+        } else if (buttonState == butStateOFF && currentState == butStateON) {
           startPress = millis();
         }
         buttonState = currentState;
@@ -179,7 +201,9 @@ void loop() {
   }
 
   check_time();
-  
-  Alarm.delay( 0 );
+
+  DebugPrintln(digitalRead(PIN_BUTTON));
+
+  Alarm.delay( 500 );
 
 }
