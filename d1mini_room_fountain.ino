@@ -16,10 +16,14 @@
 #include "ota_tool.h"
 #include "time_tool.h"
 
+//for LED status
+#include <Ticker.h>
+Ticker ticker;
+
 #define PIN_BUTTON 13
 #define PIN_RELAY 4
 #define PIN_LED BUILTIN_LED
-#define PIN_INPUT 14
+#define PIN_INPUT 12
 
 #define relStateOFF HIGH
 #define relStateON LOW
@@ -139,6 +143,9 @@ void setup() {
   attachInterrupt(PIN_INPUT, toggleInput, CHANGE);
 
   wifi_init("D1miniRF");
+  
+  // start ticker with 0.5 because we start in AP mode and try to connect
+  ticker.attach(0.2, tick);
   delay(500);
 
   init_ota("D1miniRF");
@@ -147,6 +154,7 @@ void setup() {
 
   init_time();
 
+  ticker.detach();
   turnOff();
 
   Alarm.alarmRepeat(6, 0, 0, turnOn);
@@ -158,13 +166,6 @@ void setup() {
 void loop() {
 
   check_ota();
-
-  //  digitalWrite(BUILTIN_LED, HIGH);  // turn on LED with voltage HIGH
-  //  digitalWrite(PIN_RELAY, RelayOn);  // turn on Relay with voltage LOW
-  //  delay(5000);                      // wait one second
-  //  digitalWrite(BUILTIN_LED, LOW);   // turn off LED with voltage LOW
-  //  digitalWrite(PIN_RELAY, RelayOff);   // turn off Relay with voltage HIGH
-  //  delay(5000);                      // wait one second
 
   switch (cmd_inp) {
     case CMD_WAIT:
@@ -188,7 +189,7 @@ void loop() {
       if (currentState != buttonState) {
         if (buttonState == butStateON && currentState == butStateOFF) {
           long duration = millis() - startPress;
-          if (duration < 50) {
+          if (duration < 10) {
             DebugPrintln("too short press - no action");
           } else if (duration < 5000) {
             DebugPrintln("short press - toggle relay");
@@ -210,8 +211,6 @@ void loop() {
 
   check_time();
 
-  DebugPrintln(digitalRead(PIN_BUTTON));
-
-  Alarm.delay( 500 );
+  Alarm.delay( 0 );
 
 }
