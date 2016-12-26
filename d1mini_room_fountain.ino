@@ -18,11 +18,13 @@
 
 #define PIN_BUTTON 13
 #define PIN_RELAY 4
-#define PIN_LED 12
+#define PIN_LED BUILTIN_LED
 #define PIN_INPUT 14
 
 #define relStateOFF HIGH
 #define relStateON LOW
+#define LEDStateOFF HIGH
+#define LEDStateON LOW
 #define butStateOFF HIGH
 #define butStateON LOW
 #define inpStateLow LOW // Low Water state
@@ -63,7 +65,13 @@ void setState(int s) {
   DebugPrintln(relayState);
 
   digitalWrite(PIN_RELAY, lv_s);
-  digitalWrite(PIN_LED, (lv_s + 1) % 2); // led is active low
+  if (lv_s == relStateOFF) {
+    digitalWrite(PIN_LED, LEDStateOFF);
+  }
+  else {
+    digitalWrite(PIN_LED, LEDStateON);
+  }
+
   // Blynk.virtualWrite(6, lv_s * 255);
 }
 
@@ -122,14 +130,14 @@ void setup() {
   DebugPrintln("\n" + String(__DATE__) + ", " + String(__TIME__) + " " + String(__FILE__));
 
   pinMode(PIN_LED, OUTPUT);  // initialize onboard LED as output
-  digitalWrite(PIN_LED, LOW);   // turn off LED with voltage LOW
+  digitalWrite(PIN_LED, LEDStateOFF);   // turn off LED with voltage LOW
   pinMode(PIN_RELAY, OUTPUT);  // initialize onboard LED as output
   digitalWrite(PIN_RELAY, relStateOFF);   // turn off LED with voltage LOW
   pinMode(PIN_BUTTON, INPUT_PULLUP);  // initialize onboard LED as output
   pinMode(PIN_INPUT, INPUT_PULLUP);
   InputState = digitalRead(PIN_INPUT);
   attachInterrupt(PIN_INPUT, toggleInput, CHANGE);
-  
+
   wifi_init("D1miniRF");
   delay(500);
 
@@ -182,10 +190,10 @@ void loop() {
           long duration = millis() - startPress;
           if (duration < 50) {
             DebugPrintln("too short press - no action");
-          } else if (duration < 1000) {
+          } else if (duration < 5000) {
             DebugPrintln("short press - toggle relay");
             toggle();
-          } else if (duration < 5000) {
+          } else if (duration < 10000) {
             DebugPrintln("medium press - reset");
             restart();
           } else if (duration < 60000) {
