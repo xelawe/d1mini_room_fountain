@@ -51,7 +51,7 @@ void rainbow_step(  ) {
   colorWipe(Wheel(gv_rainbow_state & 255), 0);
 
   gv_rainbow_state++;
-  if (gv_rainbow_state > 255){
+  if (gv_rainbow_state > (255*6){
     gv_rainbow_state = 0;
   }
 }
