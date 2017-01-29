@@ -25,7 +25,7 @@ Ticker ticker;
 #define PIN_RELAY 4
 #define PIN_LED BUILTIN_LED
 #define PIN_INPUT 12
-#define PIN_WS2812 14
+//#define PIN_WS2812 14
 
 #define relStateOFF HIGH
 #define relStateON LOW
@@ -161,8 +161,12 @@ void setup() {
   ticker.detach();
   turnOff();
 
+  do_WS2812_col( );
+
   Alarm.alarmRepeat(6, 0, 0, turnOn);
   Alarm.alarmRepeat(20, 15, 0, turnOff);
+
+  Alarm.timerRepeat(1, rainbow_step);
 
   DebugPrintln("done setup");
 }
@@ -214,10 +218,6 @@ void loop() {
   }
 
   check_time();
-
-  colorWipe(strip.Color(255, 0, 0), 50); // Red
-  colorWipe(strip.Color(0, 255, 0), 50); // Green
-  colorWipe(strip.Color(0, 0, 255), 50); // Blue
 
   Alarm.delay( 0 );
 
