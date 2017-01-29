@@ -15,6 +15,7 @@
 #include "tools_wifi.h"
 #include "ota_tool.h"
 #include "time_tool.h"
+#include "ws2812_tool.h"
 
 //for LED status
 #include <Ticker.h>
@@ -24,6 +25,7 @@ Ticker ticker;
 #define PIN_RELAY 4
 #define PIN_LED BUILTIN_LED
 #define PIN_INPUT 12
+#define PIN_WS2812 14
 
 #define relStateOFF HIGH
 #define relStateON LOW
@@ -143,7 +145,7 @@ void setup() {
   attachInterrupt(PIN_INPUT, toggleInput, CHANGE);
 
   wifi_init("D1miniRF");
-  
+
   // start ticker with 0.5 because we start in AP mode and try to connect
   ticker.attach(0.2, tick);
   delay(500);
@@ -151,6 +153,8 @@ void setup() {
   init_ota("D1miniRF");
 
   attachInterrupt(PIN_BUTTON, toggleState, CHANGE);
+
+  init_ws2812( );
 
   init_time();
 
@@ -210,6 +214,10 @@ void loop() {
   }
 
   check_time();
+
+  colorWipe(strip.Color(255, 0, 0), 50); // Red
+  colorWipe(strip.Color(0, 255, 0), 50); // Green
+  colorWipe(strip.Color(0, 0, 255), 50); // Blue
 
   Alarm.delay( 0 );
 
