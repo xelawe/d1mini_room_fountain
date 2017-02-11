@@ -20,6 +20,12 @@ uint16_t gv_rainbow_state;
 void colorWipe(uint32_t c, uint8_t wait) {
   for (uint16_t i = 0; i < strip.numPixels(); i++) {
     strip.setPixelColor(i, c);
+    if (wait != 0) {
+      strip.show();
+      delay(wait);
+    }
+  }
+  if (wait == 0) {
     strip.show();
     delay(wait);
   }
@@ -60,11 +66,16 @@ uint32_t Wheel_new(uint16_t iv_WheelPos) {
 
 void rainbow_step(  ) {
 
+  if (relayState == relStateOFF) {
+    colorWipe(strip.Color(0, 0, 0), 50); // Black
+    return;
+  }
+
   colorWipe(Wheel(gv_rainbow_state & 255), 0);
 
   gv_rainbow_state++;
   //if (gv_rainbow_state > (255 * 6)) {
-  if (gv_rainbow_state > (255)) {  
+  if (gv_rainbow_state > (255)) {
     gv_rainbow_state = 0;
   }
 }

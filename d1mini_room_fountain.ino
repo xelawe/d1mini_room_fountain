@@ -12,15 +12,6 @@
 #define DebugPrintln(...) { }
 #endif
 
-#include "tools_wifi.h"
-#include "ota_tool.h"
-#include "time_tool.h"
-#include "ws2812_tool.h"
-
-//for LED status
-#include <Ticker.h>
-Ticker ticker;
-
 #define PIN_BUTTON 13
 #define PIN_RELAY 4
 #define PIN_LED BUILTIN_LED
@@ -34,6 +25,18 @@ Ticker ticker;
 #define butStateOFF HIGH
 #define butStateON LOW
 #define inpStateLow LOW // Low Water state
+int relayState = relStateOFF;
+
+#include "tools_wifi.h"
+#include "ota_tool.h"
+#include "time_tool.h"
+#include "ws2812_tool.h"
+
+//for LED status
+#include <Ticker.h>
+Ticker ticker;
+
+
 
 const int CMD_WAIT = 0;
 const int CMD_BUTTON_CHANGE = 1;
@@ -42,7 +45,7 @@ int cmd = CMD_WAIT;
 const int CMD_INPUT_CHANGE = 1;
 int cmd_inp = CMD_WAIT;
 
-int relayState = relStateOFF;
+
 
 //inverted button state
 int buttonState = HIGH;
