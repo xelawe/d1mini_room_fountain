@@ -27,8 +27,8 @@ Ticker ticker;
 #define PIN_INPUT 12
 //#define PIN_WS2812 14
 
-#define relStateOFF HIGH
-#define relStateON LOW
+#define relStateOFF LOW
+#define relStateON HIGH
 #define LEDStateOFF HIGH
 #define LEDStateON LOW
 #define butStateOFF HIGH
@@ -60,18 +60,17 @@ void tick()
 
 void setState(int s) {
 
-  int lv_s = s;
+  relayState = s;
 
   // When there is no water -> turn relay off!
-  if ( lv_s == relStateON && InputState == inpStateLow ) {
-    lv_s = relStateOFF;
-    relayState = lv_s;
+  if ( relayState == relStateON && InputState == inpStateLow ) {
+    relayState = relStateOFF;
   }
 
   DebugPrintln(relayState);
 
-  digitalWrite(PIN_RELAY, lv_s);
-  if (lv_s == relStateOFF) {
+  digitalWrite(PIN_RELAY, relayState);
+  if (relayState == relStateOFF) {
     digitalWrite(PIN_LED, LEDStateOFF);
   }
   else {
@@ -82,13 +81,11 @@ void setState(int s) {
 }
 
 void turnOn() {
-  relayState = relStateON;
-  setState(relayState);
+  setState(relStateON);
 }
 
 void turnOff() {
-  relayState = relStateOFF;
-  setState(relayState);
+  setState(relStateOFF);
 }
 
 void toggleState() {
@@ -101,9 +98,10 @@ void toggleInput() {
 
 
 void toggle() {
+  
   DebugPrintln("toggle state");
-  relayState = relayState == relStateOFF ? relStateON : relStateOFF;
-  setState(relayState);
+  int lv_s = relayState == relStateOFF ? relStateON : relStateOFF;
+  setState(lv_s);
 }
 
 void restart() {

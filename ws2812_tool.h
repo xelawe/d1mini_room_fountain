@@ -27,7 +27,7 @@ void colorWipe(uint32_t c, uint8_t wait) {
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
-uint32_t Wheel_old(byte WheelPos) {
+uint32_t Wheel(byte WheelPos) {
   WheelPos = 255 - WheelPos;
   if (WheelPos < 85) {
     return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
@@ -46,31 +46,25 @@ void do_WS2812_col( ) {
   colorWipe(strip.Color(0, 0, 255), 50); // Blue
 }
 
-uint32_t Wheel(uint16_t iv_WheelPos) {
-
+uint32_t Wheel_new(uint16_t iv_WheelPos) {
 
   if (iv_WheelPos < (255 + 1)) {
     return strip.Color(255, 0, iv_WheelPos);
-  } 
-if  (iv_WheelPos < (255 * 2 + 1)) {
-return strip.Color(255 - (iv_WheelPos - 255), 0, 255);
+  }
+  if  (iv_WheelPos < (255 * 2 + 1)) {
+    return strip.Color(255 - (iv_WheelPos - 255), 0, 255);
+  }
+
 }
 
-
-}
-
-void do_WS2812_col( ) {
-  colorWipe(strip.Color(255, 0, 0), 50); // Red
-  colorWipe(strip.Color(0, 255, 0), 50); // Green
-  colorWipe(strip.Color(0, 0, 255), 50); // Blue
-}
 
 void rainbow_step(  ) {
 
   colorWipe(Wheel(gv_rainbow_state & 255), 0);
 
   gv_rainbow_state++;
-  if (gv_rainbow_state > (255*6){
+  //if (gv_rainbow_state > (255 * 6)) {
+  if (gv_rainbow_state > (255)) {  
     gv_rainbow_state = 0;
   }
 }
