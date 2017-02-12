@@ -83,6 +83,14 @@ void setState(int s) {
   // Blynk.virtualWrite(6, lv_s * 255);
 }
 
+void AlarmOff( ) {
+  turnOff( );
+}
+
+void AlarmOn( ) {
+  turnOn( );
+}
+
 void turnOn() {
   setState(relStateON);
 }
@@ -101,7 +109,7 @@ void toggleInput() {
 
 
 void toggle() {
-  
+
   DebugPrintln("toggle state");
   int lv_s = relayState == relStateOFF ? relStateON : relStateOFF;
   setState(lv_s);
@@ -162,12 +170,10 @@ void setup() {
   ticker.detach();
   turnOff();
 
-  do_WS2812_col( );
+  Alarm.alarmRepeat(6, 0, 0, AlarmOn);
+  Alarm.alarmRepeat(20, 15, 0, AlarmOff);
 
-  Alarm.alarmRepeat(6, 0, 0, turnOn);
-  Alarm.alarmRepeat(20, 15, 0, turnOff);
-
-  Alarm.timerRepeat(1, rainbow_step);
+  Alarm.timerRepeat(1, do_WS2812_step);
 
   DebugPrintln("done setup");
 }

@@ -46,12 +46,6 @@ uint32_t Wheel(byte WheelPos) {
   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
 
-void do_WS2812_col( ) {
-  colorWipe(strip.Color(255, 0, 0), 50); // Red
-  colorWipe(strip.Color(0, 255, 0), 50); // Green
-  colorWipe(strip.Color(0, 0, 255), 50); // Blue
-}
-
 uint32_t Wheel_new(uint16_t iv_WheelPos) {
 
   if (iv_WheelPos < (255 + 1)) {
@@ -64,7 +58,7 @@ uint32_t Wheel_new(uint16_t iv_WheelPos) {
 }
 
 
-void rainbow_step(  ) {
+void do_WS2812_step(  ) {
 
   if (relayState == relStateOFF) {
     colorWipe(strip.Color(0, 0, 0), 50); // Black
@@ -80,9 +74,18 @@ void rainbow_step(  ) {
   }
 }
 
+void do_WS2812_col_test( ) {
+  colorWipe(strip.Color(255, 0, 0), 50); // Red
+  colorWipe(strip.Color(0, 255, 0), 50); // Green
+  colorWipe(strip.Color(0, 0, 255), 50); // Blue
+}
+
 void init_ws2812( ) {
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
+
+  do_WS2812_col_test( );
+  
   gv_rainbow_state = 0;
-  rainbow_step(  );
+  do_WS2812_step(  );
 }
