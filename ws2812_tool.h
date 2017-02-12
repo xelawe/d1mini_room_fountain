@@ -61,7 +61,7 @@ void display_hour( int iv_hour ) {
   }
 
   // circle runs counte clockwise
-  lv_jour = lv_hour - 11;
+  lv_hour = lv_hour - 11;
 
   strip.setPixelColor(lv_hour, strip.Color(255, 255, 255));
 
