@@ -25,10 +25,6 @@ void colorWipe(uint32_t c, uint8_t wait) {
       delay(wait);
     }
   }
-  if (wait == 0) {
-    strip.show();
-    delay(wait);
-  }
 }
 
 // Input a value 0 to 255 to get a color value.
@@ -57,6 +53,16 @@ uint32_t Wheel_new(uint16_t iv_WheelPos) {
 
 }
 
+void display_hour( int iv_hour ) {
+  int lv_hour = iv_hour;
+
+  if ( lv_hour > 11 ) {
+    lv_hour = lv_hour - 12;
+  }
+
+  strip.setPixelColor(lv_hour, strip.Color(255, 255, 255));
+
+}
 
 void do_WS2812_step(  ) {
 
@@ -67,11 +73,16 @@ void do_WS2812_step(  ) {
 
   colorWipe(Wheel(gv_rainbow_state & 255), 0);
 
+  display_hour( hour( ) );
+
   gv_rainbow_state++;
   //if (gv_rainbow_state > (255 * 6)) {
-  if (gv_rainbow_state > (255)) {
+  if (gv_rainbow_state > 255) {
     gv_rainbow_state = 0;
   }
+  
+  strip.show();
+
 }
 
 void do_WS2812_col_test( ) {
@@ -85,7 +96,7 @@ void init_ws2812( ) {
   strip.show(); // Initialize all pixels to 'off'
 
   do_WS2812_col_test( );
-  
+
   gv_rainbow_state = 0;
   do_WS2812_step(  );
 }
