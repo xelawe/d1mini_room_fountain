@@ -60,6 +60,9 @@ void display_hour( int iv_hour ) {
     lv_hour = lv_hour - 12;
   }
 
+  // circle runs counte clockwise
+  lv_jour = lv_hour - 11;
+
   strip.setPixelColor(lv_hour, strip.Color(255, 255, 255));
 
 }
@@ -80,7 +83,7 @@ void do_WS2812_step(  ) {
   if (gv_rainbow_state > 255) {
     gv_rainbow_state = 0;
   }
-  
+
   strip.show();
 
 }
