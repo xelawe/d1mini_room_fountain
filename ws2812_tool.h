@@ -7,6 +7,8 @@
 // How many NeoPixels are attached to the Arduino?
 #define NUMPIXELS   12
 
+int gv_ws2812;
+
 // When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
 // Note that for older NeoPixel strips you might need to change the third parameter--see the strandtest
 // example for more information on possible values.
@@ -70,7 +72,16 @@ void display_hour( int iv_hour ) {
 void do_WS2812_step(  ) {
 
   if (relayState == relStateOFF) {
-    colorWipe(strip.Color(0, 0, 0), 50); // Black
+    if (gv_ws2812 == 1 ) {
+      gv_ws2812 = 0;
+      colorWipe(strip.Color(0, 0, 0), 50); // Black
+    }
+    return;
+  } else {
+    if (gv_ws2812 == 0 ) {
+      gv_ws2812 = 1;
+      colorWipe(strip.Color(255, 80, 0), 50);
+    }
     return;
   }
 
@@ -99,6 +110,7 @@ void init_ws2812( ) {
   strip.show(); // Initialize all pixels to 'off'
 
   do_WS2812_col_test( );
+
 
   gv_rainbow_state = 0;
   do_WS2812_step(  );
