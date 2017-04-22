@@ -31,12 +31,11 @@ int relayState = relStateOFF;
 #include "ota_tool.h"
 #include "time_tool.h"
 #include "ws2812_tool.h"
+#include "mqtt_tool.h"
 
 //for LED status
 #include <Ticker.h>
 Ticker ticker;
-
-
 
 const int CMD_WAIT = 0;
 const int CMD_BUTTON_CHANGE = 1;
@@ -75,12 +74,13 @@ void setState(int s) {
   digitalWrite(PIN_RELAY, relayState);
   if (relayState == relStateOFF) {
     digitalWrite(PIN_LED, LEDStateOFF);
+    client.publish(mqtt_pubtopic_rl, "0", true);
   }
   else {
     digitalWrite(PIN_LED, LEDStateON);
+    client.publish(mqtt_pubtopic_rl, "1", true);
   }
 
-  // Blynk.virtualWrite(6, lv_s * 255);
 }
 
 void AlarmOff( ) {
@@ -136,6 +136,28 @@ void reset() {
   delay(1000);
 }
 
+void callback_mqtt(char* topic, byte* payload, unsigned int length) {
+  DebugPrint("Message arrived [");
+  DebugPrint(topic);
+  DebugPrint("] ");
+  for (int i = 0; i < length; i++) {
+    DebugPrint((char)payload[i]);
+  }
+  DebugPrintln();
+
+  // Switch on the LED if an 1 was received as first character
+  switch ((char)payload[0]) {
+    case '0':
+      turnOff();
+      break;
+    case '1':
+      turnOn();
+      break;
+    case '2':
+      toggle();
+      break;
+  }
+}
 
 void setup() {
 #ifdef serdebug
@@ -163,16 +185,20 @@ void setup() {
 
   attachInterrupt(PIN_BUTTON, toggleState, CHANGE);
 
-  init_ws2812( );
-
   init_time();
 
   ticker.detach();
+
   turnOff();
+
+  init_ws2812( );
+
+  init_mqtt(callback_mqtt);
 
   Alarm.alarmRepeat(6, 0, 0, AlarmOn);
   Alarm.alarmRepeat(20, 15, 0, AlarmOff);
 
+  Alarm.timerRepeat(fader_steps, do_WS2812_newcol);
   Alarm.timerRepeat(1, do_WS2812_step);
 
   DebugPrintln("done setup");
@@ -181,6 +207,8 @@ void setup() {
 void loop() {
 
   check_ota();
+
+  check_mqtt();
 
   switch (cmd_inp) {
     case CMD_WAIT:
@@ -192,6 +220,13 @@ void loop() {
           turnOff();
         }
         InputState = currentStateInp;
+        
+        if (InputState == inpStateLow) {
+          client.publish(mqtt_pubtopic_wl, "0", true);
+        }
+        else {
+          client.publish(mqtt_pubtopic_wl, "1", true);
+        }
         break;
       }
   }
@@ -209,6 +244,7 @@ void loop() {
           } else if (duration < 5000) {
             DebugPrintln("short press - toggle relay");
             toggle();
+            pub_mqtt_toggle();
           } else if (duration < 10000) {
             DebugPrintln("medium press - reset");
             restart();
