@@ -89,14 +89,6 @@ void AlarmOn( ) {
   turnOn( );
 }
 
-void AlarmOff( ) {
-  turnOff( );
-}
-
-void AlarmOn( ) {
-  turnOn( );
-}
-
 void turnOn() {
   setState(relStateON);
 }
