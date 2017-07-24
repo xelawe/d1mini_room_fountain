@@ -15,6 +15,7 @@ int gv_ws2812;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN_WS2812, NEO_GRB + NEO_KHZ800);
 
 uint16_t gv_rainbow_state;
+<<<<<<< HEAD
 //uint32_t fire_color   = strip.Color ( 80,  35,  0);
 uint32_t fire_color   = strip.Color ( 255,  80,  0);
 uint32_t off_color    = strip.Color (  0,  0,  0);
@@ -39,6 +40,7 @@ class NeoFire
     uint32_t Blend(uint32_t color1, uint32_t color2);
     uint32_t Substract(uint32_t color1, uint32_t color2);
     uint32_t Fade(uint32_t color1, uint32_t color2, uint8_t position);
+    int16_t fade_calc_new( uint8_t old_col, uint8_t new_col, int divisor );
 };
 
 ///
@@ -136,6 +138,21 @@ uint32_t NeoFire::Substract(uint32_t color1, uint32_t color2)
   return strip.Color(r, g, b);
 }
 
+int16_t NeoFire::fade_calc_new( uint8_t old_col, uint8_t new_col, int divisor )
+{
+  int16_t col;
+
+  if (old_col < new_col) {
+    uint8_t diff = new_col - old_col;
+    col = (int16_t)old_col + (int16_t)round((diff / (divisor)));
+  } else {
+    uint8_t diff = old_col - new_col;
+    col = (int16_t)old_col - (int16_t)round((diff / (divisor)));
+  }
+
+  return col;
+}
+
 // fade from color1 to color2 with certain fader position
 uint32_t NeoFire::Fade(uint32_t color1, uint32_t color2, uint8_t position)
 {
@@ -158,13 +175,14 @@ uint32_t NeoFire::Fade(uint32_t color1, uint32_t color2, uint8_t position)
     divisor = 1;
   }
 
-  if (r1 < r2) {
-    uint8_t diff = r2 - r1;
-    r = (int16_t)r1 + (int16_t)round((diff / (divisor)));
-  } else {
-    uint8_t diff = r1 - r2;
-    r = (int16_t)r1 - (int16_t)round((diff / (divisor)));
-  }
+  r = fade_calc_new(r1, r2, divisor);
+  // if (r1 < r2) {
+  // uint8_t diff = r2 - r1;
+  // r = (int16_t)r1 + (int16_t)round((diff / (divisor)));
+  // } else {
+  // uint8_t diff = r1 - r2;
+  // r = (int16_t)r1 - (int16_t)round((diff / (divisor)));
+  // }
 
   if (g1 < g2) {
     uint8_t diff = g2 - g1;
@@ -197,6 +215,9 @@ void NeoFire::Clear()
 
 
 NeoFire fire(strip);
+=======
+
+>>>>>>> origin/master
 
 
 // Fill the dots one after the other with a color
@@ -250,6 +271,7 @@ void display_hour( int iv_hour ) {
 
 }
 
+<<<<<<< HEAD
 void do_WS2812_newcol(  ) {
   fader_pos = 0;
   fire.Draw();
@@ -268,23 +290,34 @@ void fireshow() {
   strip.show();
 }
 
+=======
+>>>>>>> origin/master
 void do_WS2812_step(  ) {
 
   if (relayState == relStateOFF) {
     if (gv_ws2812 == 1 ) {
       gv_ws2812 = 0;
+<<<<<<< HEAD
       //colorWipe(strip.Color(0, 0, 0), 50); // Black
-      colorWipe(off_color,50);
+      colorWipe(off_color, 50);
+=======
+      colorWipe(strip.Color(0, 0, 0), 50); // Black
+>>>>>>> origin/master
     }
     return;
   } else {
     if (gv_ws2812 == 0 ) {
       gv_ws2812 = 1;
+<<<<<<< HEAD
       // colorWipe(strip.Color(255, 80, 0), 50);
       colorWipe(fire_color, 50);
     }
     fireshow();
 
+=======
+      colorWipe(strip.Color(255, 80, 0), 50);
+    }
+>>>>>>> origin/master
     return;
   }
 
@@ -304,11 +337,16 @@ void do_WS2812_step(  ) {
 
 void do_WS2812_col_test( ) {
   colorWipe(strip.Color(255, 0, 0), 50); // Red
+<<<<<<< HEAD
   Alarm.delay(500);
   colorWipe(strip.Color(0, 255, 0), 50); // Green
   Alarm.delay(500);
-  colorWipe(strip.Color(0, 0, 255), 50); // Blue  
+  colorWipe(strip.Color(0, 0, 255), 50); // Blue
   Alarm.delay(500);
+=======
+  colorWipe(strip.Color(0, 255, 0), 50); // Green
+  colorWipe(strip.Color(0, 0, 255), 50); // Blue
+>>>>>>> origin/master
 }
 
 void init_ws2812( ) {
@@ -317,9 +355,14 @@ void init_ws2812( ) {
 
   do_WS2812_col_test( );
 
+<<<<<<< HEAD
   do_WS2812_newcol( );
 
   gv_rainbow_state = 0;
   gv_ws2812 = 1;
+=======
+
+  gv_rainbow_state = 0;
+>>>>>>> origin/master
   do_WS2812_step(  );
 }

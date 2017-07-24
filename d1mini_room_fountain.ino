@@ -45,7 +45,6 @@ const int CMD_INPUT_CHANGE = 1;
 int cmd_inp = CMD_WAIT;
 
 
-
 //inverted button state
 int buttonState = HIGH;
 int InputState = inpStateLow;
@@ -58,7 +57,6 @@ void tick()
   int state = digitalRead(PIN_LED);  // get the current state of GPIO1 pin
   digitalWrite(PIN_LED, !state);     // set pin to the opposite state
 }
-
 
 void setState(int s) {
 
@@ -81,6 +79,14 @@ void setState(int s) {
     client.publish(mqtt_pubtopic_rl, "1", true);
   }
 
+}
+
+void AlarmOff( ) {
+  turnOff( );
+}
+
+void AlarmOn( ) {
+  turnOn( );
 }
 
 void AlarmOff( ) {
@@ -185,6 +191,8 @@ void setup() {
 
   attachInterrupt(PIN_BUTTON, toggleState, CHANGE);
 
+  init_ws2812( );
+
   init_time();
 
   ticker.detach();
@@ -199,6 +207,7 @@ void setup() {
   Alarm.alarmRepeat(20, 15, 0, AlarmOff);
 
   Alarm.timerRepeat(fader_steps, do_WS2812_newcol);
+
   Alarm.timerRepeat(1, do_WS2812_step);
 
   DebugPrintln("done setup");
@@ -214,19 +223,22 @@ void loop() {
     case CMD_WAIT:
       break;
     case CMD_INPUT_CHANGE:
-      int currentStateInp = digitalRead(PIN_INPUT);
-      if (currentStateInp != InputState) {
-        if (currentStateInp == inpStateLow) {
-          turnOff();
+      {
+        int currentStateInp = digitalRead(PIN_INPUT);
+        if (currentStateInp != InputState) {
+          if (currentStateInp == inpStateLow) {
+            turnOff();
+          }
+          InputState = currentStateInp;
+
+          if (InputState == inpStateLow) {
+            client.publish(mqtt_pubtopic_wl, "0", true);
+          }
+          else {
+            client.publish(mqtt_pubtopic_wl, "1", true);
+          }
         }
-        InputState = currentStateInp;
-        
-        if (InputState == inpStateLow) {
-          client.publish(mqtt_pubtopic_wl, "0", true);
-        }
-        else {
-          client.publish(mqtt_pubtopic_wl, "1", true);
-        }
+        cmd_inp = CMD_WAIT;
         break;
       }
   }
@@ -235,29 +247,32 @@ void loop() {
     case CMD_WAIT:
       break;
     case CMD_BUTTON_CHANGE:
-      int currentState = digitalRead(PIN_BUTTON);
-      if (currentState != buttonState) {
-        if (buttonState == butStateON && currentState == butStateOFF) {
-          long duration = millis() - startPress;
-          if (duration < 10) {
-            DebugPrintln("too short press - no action");
-          } else if (duration < 5000) {
-            DebugPrintln("short press - toggle relay");
-            toggle();
-            pub_mqtt_toggle();
-          } else if (duration < 10000) {
-            DebugPrintln("medium press - reset");
-            restart();
-          } else if (duration < 60000) {
-            DebugPrintln("long press - reset settings");
-            reset();
+      {
+        int currentState = digitalRead(PIN_BUTTON);
+        if (currentState != buttonState) {
+          if (buttonState == butStateON && currentState == butStateOFF) {
+            long duration = millis() - startPress;
+            if (duration < 10) {
+              DebugPrintln("too short press - no action");
+            } else if (duration < 5000) {
+              DebugPrintln("short press - toggle relay");
+              toggle();
+              pub_mqtt_toggle();
+            } else if (duration < 10000) {
+              DebugPrintln("medium press - reset");
+              restart();
+            } else if (duration < 60000) {
+              DebugPrintln("long press - reset settings");
+              reset();
+            }
+          } else if (buttonState == butStateOFF && currentState == butStateON) {
+            startPress = millis();
           }
-        } else if (buttonState == butStateOFF && currentState == butStateON) {
-          startPress = millis();
+          buttonState = currentState;
         }
-        buttonState = currentState;
+        cmd = CMD_WAIT;
+        break;
       }
-      break;
   }
 
   check_time();
