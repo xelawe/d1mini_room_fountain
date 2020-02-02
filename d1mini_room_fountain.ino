@@ -1,7 +1,6 @@
 /*
   Room Fountain control
 */
-
 #include <cy_serdebug.h>
 #include <cy_serial.h>
 
@@ -13,7 +12,7 @@
 #define PIN_RELAY 4
 #define PIN_LED BUILTIN_LED
 #define PIN_INPUT 12
-//#define PIN_WS2812 14
+#define PIN_WS2812 14
 
 #define relStateOFF LOW
 #define relStateON HIGH
@@ -33,6 +32,7 @@ const char *gc_hostname = "D1miniRF";
 //for LED status
 #include <Ticker.h>
 Ticker ticker;
+Ticker WS2812_ticker;
 
 const int CMD_WAIT = 0;
 const int CMD_BUTTON_CHANGE = 1;
@@ -94,11 +94,11 @@ void turnOff() {
   setState(relStateOFF);
 }
 
-void toggleState() {
+ICACHE_RAM_ATTR void toggleState() {
   cmd = CMD_BUTTON_CHANGE;
 }
 
-void toggleInput() {
+ICACHE_RAM_ATTR void toggleInput() {
   cmd_inp = CMD_INPUT_CHANGE;
 }
 
@@ -188,18 +188,15 @@ void setup() {
 
   init_ws2812( );
 
-  //init_mqtt(callback_mqtt);
-  //init_mqtt(gv_clientname);
   init_mqtt_local();
-
 
 
   Alarm.alarmRepeat(6, 0, 0, AlarmOn);
   Alarm.alarmRepeat(20, 15, 0, AlarmOff);
 
-  Alarm.timerRepeat(fader_steps, do_WS2812_newcol);
-
-  Alarm.timerRepeat(1, do_WS2812_step);
+  //Alarm.timerRepeat(fader_steps, do_WS2812_newcol);
+  //Alarm.timerRepeat(1, do_WS2812_step);
+  WS2812_ticker.attach(0.5, do_WS2812_tick);
 
   DebugPrintln("done setup");
 }

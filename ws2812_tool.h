@@ -411,3 +411,15 @@ void init_ws2812( ) {
 
   do_WS2812_step(  );
 }
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void do_WS2812_tick() {
+
+  if (fader_pos >= fader_steps ) {
+    do_WS2812_newcol();
+  }
+
+  do_WS2812_step(  );
+
+  //Serial.println();
+}

@@ -16,14 +16,14 @@ const char* mqtt_pubtopic_status_i;
 
 void init_mqtt_local() {
 
-  mqtt_pubtopic_status_i_s += gv_clientname;
-  mqtt_pubtopic_status_i_s += '/';
-  mqtt_pubtopic_status_i_s += mqtt_pubtopic_status_i_suff;
-  mqtt_pubtopic_status_i = (char*) mqtt_pubtopic_status_i_s.c_str();
-  DebugPrintln(mqtt_pubtopic_status_i);
+//  mqtt_pubtopic_status_i_s += gv_clientname;
+//  mqtt_pubtopic_status_i_s += '/';
+//  mqtt_pubtopic_status_i_s += mqtt_pubtopic_status_i_suff;
+//  mqtt_pubtopic_status_i = (char*) mqtt_pubtopic_status_i_s.c_str();
+//  DebugPrintln(mqtt_pubtopic_status_i);
 
 
-  
+  //init_mqtt(callback_mqtt);
   init_mqtt(gv_clientname);
 }
 
