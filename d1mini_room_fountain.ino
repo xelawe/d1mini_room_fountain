@@ -1,16 +1,13 @@
 /*
-   Blink and OTA
-   Turns on the onboard LED on for one second, then off for one second, repeatedly.
-   This uses delay() to pause between LED toggles.
+  Room Fountain control
 */
-#define serdebug
-#ifdef serdebug
-#define DebugPrint(...) {  Serial.print(__VA_ARGS__); }
-#define DebugPrintln(...) {  Serial.println(__VA_ARGS__); }
-#else
-#define DebugPrint(...) { }
-#define DebugPrintln(...) { }
-#endif
+
+#include <cy_serdebug.h>
+#include <cy_serial.h>
+
+#include "cy_wifi.h"
+#include "cy_ota.h"
+
 
 #define PIN_BUTTON 13
 #define PIN_RELAY 4
@@ -27,8 +24,10 @@
 #define inpStateLow LOW // Low Water state
 int relayState = relStateOFF;
 
-#include "tools_wifi.h"
-#include "ota_tool.h"
+const char *gc_hostname = "D1miniRF";
+
+//#include "tools_wifi.h"
+//#include "ota_tool.h"
 #include "time_tool.h"
 #include "ws2812_tool.h"
 #include "mqtt_tool.h"
@@ -72,11 +71,11 @@ void setState(int s) {
   digitalWrite(PIN_RELAY, relayState);
   if (relayState == relStateOFF) {
     digitalWrite(PIN_LED, LEDStateOFF);
-    client.publish(mqtt_pubtopic_rl, "0", true);
+    //client.publish(mqtt_pubtopic_rl, "0", true);
   }
   else {
     digitalWrite(PIN_LED, LEDStateON);
-    client.publish(mqtt_pubtopic_rl, "1", true);
+    //client.publish(mqtt_pubtopic_rl, "1", true);
   }
 
 }
@@ -158,11 +157,8 @@ void callback_mqtt(char* topic, byte* payload, unsigned int length) {
 }
 
 void setup() {
-#ifdef serdebug
-  Serial.begin(115200);
-#endif
 
-  DebugPrintln("\n" + String(__DATE__) + ", " + String(__TIME__) + " " + String(__FILE__));
+  cy_serial::start(__FILE__);
 
   pinMode(PIN_LED, OUTPUT);  // initialize onboard LED as output
   digitalWrite(PIN_LED, LEDStateOFF);   // turn off LED with voltage LOW
@@ -173,13 +169,14 @@ void setup() {
   InputState = digitalRead(PIN_INPUT);
   attachInterrupt(PIN_INPUT, toggleInput, CHANGE);
 
-  wifi_init("D1miniRF");
+  wifi_init(gc_hostname);
+
 
   // start ticker with 0.5 because we start in AP mode and try to connect
   ticker.attach(0.2, tick);
   delay(500);
 
-  init_ota("D1miniRF");
+  init_ota(gv_clientname);
 
   attachInterrupt(PIN_BUTTON, toggleState, CHANGE);
 
@@ -193,7 +190,11 @@ void setup() {
 
   init_ws2812( );
 
-  init_mqtt(callback_mqtt);
+  //init_mqtt(callback_mqtt);
+  //init_mqtt(gv_clientname);
+  init_mqtt_local();
+
+
 
   Alarm.alarmRepeat(6, 0, 0, AlarmOn);
   Alarm.alarmRepeat(20, 15, 0, AlarmOff);
@@ -224,10 +225,10 @@ void loop() {
           InputState = currentStateInp;
 
           if (InputState == inpStateLow) {
-            client.publish(mqtt_pubtopic_wl, "0", true);
+            //client.publish(mqtt_pubtopic_wl, "0", true);
           }
           else {
-            client.publish(mqtt_pubtopic_wl, "1", true);
+            //client.publish(mqtt_pubtopic_wl, "1", true);
           }
         }
         cmd_inp = CMD_WAIT;

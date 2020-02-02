@@ -18,6 +18,8 @@ uint16_t gv_rainbow_state;
 //uint32_t fire_color   = strip.Color ( 80,  35,  0);
 uint32_t fire_color   = strip.Color ( 255,  80,  0);
 uint32_t off_color    = strip.Color (  0,  0,  0);
+//uint32_t ice_color   = strip.Color ( 0,  216,  255);
+uint32_t ice_color   = strip.Color ( 0,  80,  90);
 
 int fader_pos;
 #define fader_steps 60
