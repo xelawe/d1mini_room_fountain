@@ -26,8 +26,6 @@ int relayState = relStateOFF;
 
 const char *gc_hostname = "D1miniRF";
 
-//#include "tools_wifi.h"
-//#include "ota_tool.h"
 #include "time_tool.h"
 #include "ws2812_tool.h"
 #include "mqtt_tool.h"
