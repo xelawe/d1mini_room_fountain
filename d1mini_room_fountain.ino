@@ -71,11 +71,11 @@ void setState(int s) {
   digitalWrite(PIN_RELAY, relayState);
   if (relayState == relStateOFF) {
     digitalWrite(PIN_LED, LEDStateOFF);
-    //client.publish(mqtt_pubtopic_rl, "0", true);
+    client.publish(mqtt_pubtopic_rl, "0", true);
   }
   else {
     digitalWrite(PIN_LED, LEDStateON);
-    //client.publish(mqtt_pubtopic_rl, "1", true);
+    client.publish(mqtt_pubtopic_rl, "1", true);
   }
 
 }
@@ -225,10 +225,10 @@ void loop() {
           InputState = currentStateInp;
 
           if (InputState == inpStateLow) {
-            //client.publish(mqtt_pubtopic_wl, "0", true);
+            client.publish(mqtt_pubtopic_wl, "0", true);
           }
           else {
-            //client.publish(mqtt_pubtopic_wl, "1", true);
+            client.publish(mqtt_pubtopic_wl, "1", true);
           }
         }
         cmd_inp = CMD_WAIT;

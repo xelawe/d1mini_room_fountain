@@ -34,13 +34,14 @@ class NeoFire
 
     NeoFire(Adafruit_NeoPixel&);
     uint32_t fire_colors[NUMPIXELS];
+    int fire_ticks[NUMPIXELS];
     void Draw();
     void Clear();
     void AddColor(uint8_t position, uint32_t color);
     void SubstractColor(uint8_t position, uint32_t color);
     uint32_t Blend(uint32_t color1, uint32_t color2);
     uint32_t Substract(uint32_t color1, uint32_t color2);
-    uint32_t Fade(uint32_t color1, uint32_t color2, uint8_t position);
+    uint32_t Fade(uint32_t color1, uint32_t color2, uint8_t position, int led);
     int16_t fade_calc_new( uint8_t old_col, uint8_t new_col, int divisor );
 };
 
@@ -154,14 +155,19 @@ int16_t NeoFire::fade_calc_new( uint8_t old_col, uint8_t new_col, int divisor )
   return col;
 }
 
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // fade from color1 to color2 with certain fader position
-uint32_t NeoFire::Fade(uint32_t color1, uint32_t color2, uint8_t position)
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+uint32_t NeoFire::Fade(uint32_t color1, uint32_t color2, uint8_t position, int led)
 {
   uint8_t r1, g1, b1;
   uint8_t r2, g2, b2;
   uint8_t r3, g3, b3;
   int16_t r, g, b;
   uint8_t diff;
+  float incf_r, incf_g, incf_b;
+  int16_t inci_r, inci_g, inci_b;
 
   r1 = (uint8_t)(color1 >> 16),
   g1 = (uint8_t)(color1 >>  8),
@@ -171,38 +177,98 @@ uint32_t NeoFire::Fade(uint32_t color1, uint32_t color2, uint8_t position)
   g2 = (uint8_t)(color2 >>  8),
   b2 = (uint8_t)(color2 >>  0);
 
-  int divisor = fader_steps - position;
+  if ( position == 1) {
+    fire_ticks[led] = 0;
+  }
+
+  //  if ( led < 5 ) {
+  //    Serial.print("LED: ");
+  //    Serial.print(led);
+  //    Serial.print(" ");
+
+
+  //  Serial.print("Rot:");
+  //  Serial.print(r1);
+  //  Serial.print(" -> ");
+  //  Serial.print(r2);
+  //  Serial.print("Grün:");
+  //  Serial.print(g1);
+  //  Serial.print(" -> ");
+  //  Serial.print(g2);
+  //  Serial.print("Blau:");
+  //  Serial.print(b1);
+  //  Serial.print(" -> ");
+  //  Serial.println(b2);
+  // }
+
+
+  // int divisor = fader_steps - position;
+  int divisor = fader_steps - position + fire_ticks[led];
   if (divisor <= 0) {
     divisor = 1;
   }
 
-  r = fade_calc_new(r1, r2, divisor);
-  // if (r1 < r2) {
-  // uint8_t diff = r2 - r1;
-  // r = (int16_t)r1 + (int16_t)round((diff / (divisor)));
-  // } else {
-  // uint8_t diff = r1 - r2;
-  // r = (int16_t)r1 - (int16_t)round((diff / (divisor)));
-  // }
+  if (r1 < r2) {
+    uint8_t diff = r2 - r1;
+    incf_r = (diff   * ( fire_ticks[led] + 1 ) ) / (divisor);
+    inci_r = (int16_t)round( incf_r );
+    r = (int16_t)r1 + inci_r;
+  } else {
+    uint8_t diff = r1 - r2;
+    incf_r = (diff   * ( fire_ticks[led] + 1 ) ) / (divisor);
+    inci_r = (int16_t)round( incf_r );
+    r = (int16_t)r1 - inci_r;
+  }
 
   if (g1 < g2) {
     uint8_t diff = g2 - g1;
-    g = (int16_t)g1 + (int16_t)round((diff / (divisor)));
+    incf_g = (diff   * ( fire_ticks[led] + 1 ) ) / (divisor);
+    inci_g = (int16_t)round( incf_g );
+    g = (int16_t)g1 + inci_g;
   } else {
     uint8_t diff = g1 - g2;
-    g = (int16_t)g1 - (int16_t)round((diff / (divisor)));
+    incf_g = (diff   * ( fire_ticks[led] + 1 ) ) / (divisor);
+    inci_g = (int16_t)round( incf_g );
+    g = (int16_t)g1 - inci_g;
   }
 
   if (b1 < b2) {
     uint8_t diff = b2 - b1;
-    b = (int16_t)b1 + (int16_t)round((diff / (divisor)));
+    incf_b = (diff   * ( fire_ticks[led] + 1 ) ) / (divisor);
+    inci_b = (int16_t)round( incf_b );
+    b = (int16_t)b1 + inci_b;
   } else {
     uint8_t diff = b1 - b2;
-    b = (int16_t)b1 - (int16_t)round((diff / (divisor)));
+    incf_b = (diff   * ( fire_ticks[led] + 1 ) ) / (divisor);
+    inci_b = (int16_t)round( incf_b );
+    b = (int16_t)b1 - inci_b;
   }
+
+  if ( inci_r == 0 && inci_g == 0 && inci_b == 0 ) {
+    fire_ticks[led]++;
+  } else {
+    fire_ticks[led] = 0;
+  }
+
+  //  if ( led < 5 ) {
+  //    Serial.print("Tick: ");
+  //    Serial.print(fire_ticks[led] );
+  //    Serial.print(", ");
+  //
+  //    Serial.print("R: ");
+  //    Serial.print(inci_r);
+  //    Serial.print(" ");
+  //    Serial.print("G: ");
+  //    Serial.print(inci_g);
+  //    Serial.print(" ");
+  //    Serial.print("B: ");
+  //    Serial.print(inci_b);
+  //    Serial.print(" ");
+  //  }
 
   return strip.Color(r, g, b);
 }
+
 
 ///
 /// Every LED to black
@@ -279,7 +345,7 @@ void fireshow() {
   //Serial.println(fader_pos );
   for (int i = 0; i < NUMPIXELS; i++)
   {
-    strip.setPixelColor(i, fire.Fade(strip.getPixelColor(i), fire.fire_colors[i], fader_pos) );
+    strip.setPixelColor(i, fire.Fade(strip.getPixelColor(i), fire.fire_colors[i], fader_pos, i) );
   }
 
   strip.show();
