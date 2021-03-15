@@ -1,3 +1,22 @@
+/**
+  Arduino Uno - NeoPixel Fire
+  v. 1.0
+  Copyright (C) 2015 Robert Ulbricht
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
 #include <avr/power.h>
@@ -19,14 +38,14 @@ uint16_t gv_rainbow_state;
 uint32_t fire_color   = strip.Color ( 255,  80,  0);
 uint32_t off_color    = strip.Color (  0,  0,  0);
 //uint32_t ice_color   = strip.Color ( 0,  216,  255);
-uint32_t ice_color   = strip.Color ( 0,  80,  90);
+uint32_t ice_color   = strip.Color ( 0,  80,  94);
 
 int fader_pos;
 #define fader_steps 60
 
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Fire simulator
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class NeoFire
 {
     Adafruit_NeoPixel &strip;
@@ -45,16 +64,16 @@ class NeoFire
     int16_t fade_calc_new( uint8_t old_col, uint8_t new_col, int divisor );
 };
 
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Constructor
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 NeoFire::NeoFire(Adafruit_NeoPixel& n_strip) : strip (n_strip)
 {
 }
 
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Set all colors
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void NeoFire::Draw()
 {
   Clear();
@@ -62,7 +81,11 @@ void NeoFire::Draw()
   for (int i = 0; i < NUMPIXELS; i++)
   {
     AddColor(i, fire_color);
-    int r = random(255);
+    //int r = random(255);
+    int16_t r = random(355);
+    if (r > 255) {
+      r = 255;
+    }
     uint32_t diff_color = strip.Color ( r, r / 2, r / 2);
     SubstractColor(i, diff_color);
   }
@@ -70,9 +93,9 @@ void NeoFire::Draw()
   //strip.show();
 }
 
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Set color of LED
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void NeoFire::AddColor(uint8_t position, uint32_t color)
 {
   //  uint32_t blended_color = Blend(strip.getPixelColor(position), color);
@@ -81,9 +104,9 @@ void NeoFire::AddColor(uint8_t position, uint32_t color)
   fire_colors[position] = blended_color;
 }
 
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Set color of LED
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void NeoFire::SubstractColor(uint8_t position, uint32_t color)
 {
   // uint32_t blended_color = Substract(strip.getPixelColor(position), color);
@@ -92,9 +115,9 @@ void NeoFire::SubstractColor(uint8_t position, uint32_t color)
   fire_colors[position] = blended_color;
 }
 
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Color blending
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 uint32_t NeoFire::Blend(uint32_t color1, uint32_t color2)
 {
   uint8_t r1, g1, b1;
@@ -112,9 +135,9 @@ uint32_t NeoFire::Blend(uint32_t color1, uint32_t color2)
   return strip.Color(constrain(r1 + r2, 0, 255), constrain(g1 + g2, 0, 255), constrain(b1 + b2, 0, 255));
 }
 
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Color blending
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 uint32_t NeoFire::Substract(uint32_t color1, uint32_t color2)
 {
   uint8_t r1, g1, b1;
@@ -270,9 +293,9 @@ uint32_t NeoFire::Fade(uint32_t color1, uint32_t color2, uint8_t position, int l
 }
 
 
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Every LED to black
-///
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void NeoFire::Clear()
 {
   for (uint16_t i = 0; i < strip.numPixels (); i++)
@@ -282,7 +305,9 @@ void NeoFire::Clear()
 
 NeoFire fire(strip);
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Fill the dots one after the other with a color
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void colorWipe(uint32_t c, uint8_t wait) {
   for (uint16_t i = 0; i < strip.numPixels(); i++) {
     strip.setPixelColor(i, c);
@@ -293,8 +318,10 @@ void colorWipe(uint32_t c, uint8_t wait) {
   }
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 uint32_t Wheel(byte WheelPos) {
   WheelPos = 255 - WheelPos;
   if (WheelPos < 85) {
@@ -308,6 +335,7 @@ uint32_t Wheel(byte WheelPos) {
   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 uint32_t Wheel_new(uint16_t iv_WheelPos) {
 
   if (iv_WheelPos < (255 + 1)) {
@@ -318,26 +346,29 @@ uint32_t Wheel_new(uint16_t iv_WheelPos) {
   }
 
 }
+//
+//// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//void display_hour( int iv_hour ) {
+//  int lv_hour = iv_hour;
+//
+//  if ( lv_hour > 11 ) {
+//    lv_hour = lv_hour - 12;
+//  }
+//
+//  // circle runs counte clockwise
+//  lv_hour = 11 - lv_hour;
+//
+//  strip.setPixelColor(lv_hour, strip.Color(255, 255, 255));
+//
+//}
 
-void display_hour( int iv_hour ) {
-  int lv_hour = iv_hour;
-
-  if ( lv_hour > 11 ) {
-    lv_hour = lv_hour - 12;
-  }
-
-  // circle runs counte clockwise
-  lv_hour = 11 - lv_hour;
-
-  strip.setPixelColor(lv_hour, strip.Color(255, 255, 255));
-
-}
-
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void do_WS2812_newcol(  ) {
   fader_pos = 0;
   fire.Draw();
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void fireshow() {
 
   fader_pos++;
@@ -351,6 +382,7 @@ void fireshow() {
   strip.show();
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void do_WS2812_step(  ) {
 
   if (relayState == relStateOFF) {
@@ -376,7 +408,7 @@ void do_WS2812_step(  ) {
 
   colorWipe(Wheel(gv_rainbow_state & 255), 0);
 
-  display_hour( hour( ) );
+  //display_hour( hour( ) );
 
   gv_rainbow_state++;
   //if (gv_rainbow_state > (255 * 6)) {
@@ -388,16 +420,21 @@ void do_WS2812_step(  ) {
 
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void do_WS2812_col_test( ) {
   colorWipe(strip.Color(255, 0, 0), 50); // Red
-  Alarm.delay(500);
+  //Alarm.delay(500);
+  delay(500);
   colorWipe(strip.Color(0, 255, 0), 50); // Green
-  Alarm.delay(500);
+  //Alarm.delay(500);
+  delay(500);
   colorWipe(strip.Color(0, 0, 255), 50); // Blue
-  Alarm.delay(500);
+  //Alarm.delay(500);
+  delay(500);
 
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void init_ws2812( ) {
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
